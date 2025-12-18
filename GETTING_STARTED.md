@@ -292,6 +292,56 @@ docker run -p 8000:8000 flower-classification
 docker run -p 8000:8000 -v ./models:/app/models flower-classification
 ```
 
+## 🔁 CI/CD (Konsep, Opsional)
+
+Repositori ini belum memiliki CI/CD otomatis, tetapi alur manual yang sudah ada dapat dengan mudah diotomasi menggunakan **GitHub Actions** dan **Docker**.
+
+### CI (Continuous Integration)
+
+Di GitHub Actions, pipeline sederhana bisa melakukan:
+
+- Checkout kode → install dependency:
+  ```bash
+  pip install -r requirements.txt
+  ```
+- Menjalankan test (jika sudah dibuat):
+  ```bash
+  pytest
+  ```
+- Mencoba build Docker image:
+  ```bash
+  docker build -t flower-classification -f docker/Dockerfile .
+  ```
+
+Workflow ini berjalan otomatis pada setiap `push`/`pull_request` untuk memastikan:
+- Kode masih bisa di-build
+- Tidak ada test yang gagal
+
+### CD (Continuous Deployment)
+
+Setelah CI sukses, CD dapat:
+
+1. Push Docker image ke registry (Docker Hub / GitHub Container Registry).
+2. Di server (staging/production), jalankan container baru:
+   ```bash
+   docker pull <registry>/flower-classification:latest
+   docker run -d -p 8000:8000 \
+     -e CANARY_RATIO=0.1 \
+     -v /path/to/models:/app/models \
+     <registry>/flower-classification:latest
+   ```
+
+Dalam konteks proyek ini:
+
+- **CI** memastikan:
+  - Training & serving tetap berjalan setelah perubahan kode.
+  - Docker image selalu bisa dibangun.
+- **CD** memastikan:
+  - Versi API terbaru dapat di-deploy dengan satu perintah.
+  - Strategi canary (SVM sebagai production, Naive Bayes sebagai canary) tetap bisa dikontrol melalui environment variable `CANARY_RATIO`.
+
+Bagian ini bersifat konseptual dan dapat dijadikan bahan presentasi untuk menjelaskan bagaimana pipeline MLOps ini bisa ditingkatkan menjadi production-grade dengan CI/CD.
+
 ## 🔧 Troubleshooting
 
 ### Masalah: ModuleNotFoundError
@@ -401,10 +451,3 @@ python cli/main.py monitor show
 - API documentation: `http://localhost:8000/docs` (setelah server running)
 
 ---
-
-**Kelompok 6 MLOps RC**
-- Ranippu
-- Ratu
-- Anwar
-- Yohana
-

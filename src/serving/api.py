@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 
 from .schemas import PredictionResponse
 from .inference import MODELS_DIR, load_artifacts, predict_with_model
-from monitoring.drift import log_prediction, compute_drift  # src/monitoring/drift.py
+from src.monitoring.drift import log_prediction, compute_drift  # src/monitoring/drift.py
 
 app = FastAPI(title="Flower Classification API (SVM & Naive Bayes)")
 
